@@ -12,9 +12,9 @@ class Master(models.Model):
     sales = models.CharField(max_length=25)
     projManager = models.CharField(max_length=25)
     engineer = models.CharField(max_length=25)
-    reqDate = models.DateField(auto_now=False, auto_now_add=True)
-    dueDate = models.DateField(auto_now=False, auto_now_add=True)
-    compDate = models.DateField(auto_now=False, auto_now_add=True)
+    reqDate = models.DateTimeField(auto_now=False, auto_now_add=True)
+    dueDate = models.DateTimeField(auto_now=False, auto_now_add=True)
+    compDate = models.DateTimeField(auto_now=False, auto_now_add=True)
     comments = models.CharField(max_length=1000)
     reqDate.editable = True
     dueDate.editable = True
