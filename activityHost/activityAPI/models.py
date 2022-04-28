@@ -13,7 +13,7 @@ class Master(models.Model):
     projManager = models.CharField(max_length=25)
     engineer = models.CharField(max_length=25)
     reqDate = models.DateField( blank=True, null=True)
-    dueDate = models.DateField( blank=True, null=True)
+    dueDate = models.DateField(blank=True, null=True)
     compDate = models.DateField( blank=True, null=True)
     comments = models.CharField(max_length=1000, blank=True)
     reqDate.editable = True

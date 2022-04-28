@@ -6,7 +6,7 @@ from .models import Master
 class MasterSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Master
-        fields = ('id', 'industry', 'oppNumber', 'name', 'prodCode', 'request', 'sales', 'projManager', 'engineer', 'reqDate', 'dueDate', 'compDate', 'comments' )
+        fields = ('id', 'industry', 'oppNumber', 'name', 'prodCode', 'request', 'sales', 'projManager', 'engineer', 'comments' )
         widgets = {
             'reqDate': DateInput(),
             'dueDate': DateInput(),
