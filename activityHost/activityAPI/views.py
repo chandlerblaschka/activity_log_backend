@@ -1,13 +1,13 @@
-import imp
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from rest_framework import viewsets
+# from rest_framework import viewsets
 from .serializers import MasterSerializer
 from .models import Master
-from rest_framework.permissions import AllowAny
+# from rest_framework.permissions import AllowAny
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
+from rest_framework import status
 
 
 # class MasterViewSet(viewsets.ModelViewSet):
@@ -27,17 +27,26 @@ from rest_framework.parsers import JSONParser
 @api_view(['GET'])
 def dashboard(request):
     if request.method == 'GET':
-        jobs = Master.objects.all()
-        dashboard_serializer = MasterSerializer(jobs, many=True)
+        all_actions = Master.objects.all()
+        dashboard_serializer = MasterSerializer(all_actions, many=True)
         return JsonResponse(dashboard_serializer.data, safe=False)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def golf(request):
     if request.method == 'GET':
-        jobs = Master.objects.filter(industry='Golf')
-        golf_serializer = MasterSerializer(jobs, many=True)
+        golf_actions = Master.objects.filter(industry='Golf')
+        golf_serializer = MasterSerializer(golf_actions, many=True)
         return JsonResponse(golf_serializer.data, safe=False)
+
+    if request.method == 'POST':
+        golf_data = JSONParser().parse(request)
+        golf_serializer = MasterSerializer(data=golf_data)
+        if golf_serializer.is_valid():
+            golf_serializer.save()
+            return JsonResponse(golf_serializer.data, status=status.HTTP_201_CREATED)
+        return JsonResponse(golf_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
