@@ -1,10 +1,64 @@
+import imp
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from rest_framework import viewsets
 from .serializers import MasterSerializer
 from .models import Master
+from rest_framework.permissions import AllowAny
+from django.shortcuts import render
+from rest_framework.decorators import api_view
+from rest_framework.parsers import JSONParser
 
-class MasterViewSet(viewsets.ModelViewSet):
-    queryset = Master.objects.all().order_by('industry')
-    serializer_class = MasterSerializer
 
-# Create your views here.
+# class MasterViewSet(viewsets.ModelViewSet):
+#     queryset = Master.objects.all().order_by('industry')
+#     serializer_class = MasterSerializer
+#     permission_classes = (AllowAny,)
+
+# # Create your views here.
+
+# class GolfViewSet(viewsets.ModelViewSet):
+#     # queryset = Master.objects.filter(industry='Golf')
+#     queryset = Master.objects.filter(industry='Golf')
+#     serializer_class = MasterSerializer
+#     permission_classes = (AllowAny,)
+
+
+@api_view(['GET'])
+def dashboard(request):
+    if request.method == 'GET':
+        jobs = Master.objects.all()
+        dashboard_serializer = MasterSerializer(jobs, many=True)
+        return JsonResponse(dashboard_serializer.data, safe=False)
+
+
+@api_view(['GET'])
+def golf(request):
+    if request.method == 'GET':
+        jobs = Master.objects.filter(industry='Golf')
+        golf_serializer = MasterSerializer(jobs, many=True)
+        return JsonResponse(golf_serializer.data, safe=False)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def golf_action(request, pk):
+    try:
+        golf_action = Master.objects.filter(industry='Golf').get(pk=pk)
+    except Master.DoesNotExist:
+        return JsonResponse({'message': 'This job does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        golf_action_serializer = MasterSerializer(golf_action)
+        return JsonResponse(golf_action_serializer.data)
+
+    elif request.method == 'PUT':
+        golf_action_data = JSONParser().parse(request)
+        golf_action_serializer = MasterSerializer(golf_action, data=golf_action_data)
+        if golf_action_serializer.is_valid():
+            golf_action_serializer.save()
+            return JsonResponse(golf_action_serializer.data)
+        return JsonResponse(golf_action_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        golf_action.delete()
+        return JsonResponse({'message': 'Job was deleted successfully '})
