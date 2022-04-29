@@ -1,3 +1,4 @@
+from tkinter.messagebox import RETRY
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 # from rest_framework import viewsets
@@ -47,27 +48,57 @@ def golf(request):
             return JsonResponse(golf_serializer.data, status=status.HTTP_201_CREATED)
         return JsonResponse(golf_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
+@api_view((['GET']))
+def golf_open(request):
+    if request.method == 'GET':
+        golf_open = Master.objects.filter(compDate=None)
+        golf_open_serializer = MasterSerializer(golf_open, many=True)
+        return JsonResponse(golf_open_serializer.data, safe=False)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def golf_action(request, pk):
+# not used based on site functionality, but works as an endpoint
+# @api_view(['GET', 'PUT', 'DELETE'])
+# def golf_action(request, pk):
+#     try:
+#         golf_action = Master.objects.filter(industry='Golf').get(pk=pk)
+#     except Master.DoesNotExist:
+#         return JsonResponse({'message': 'This job does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+
+#     if request.method == 'GET':
+#         golf_action_serializer = MasterSerializer(golf_action)
+#         return JsonResponse(golf_action_serializer.data)
+
+#     elif request.method == 'PUT':
+#         golf_action_data = JSONParser().parse(request)
+#         golf_action_serializer = MasterSerializer(golf_action, data=golf_action_data)
+#         if golf_action_serializer.is_valid():
+#             golf_action_serializer.save()
+#             return JsonResponse(golf_action_serializer.data)
+#         return JsonResponse(golf_action_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#     elif request.method == 'DELETE':
+#         golf_action.delete()
+#         return JsonResponse({'message': 'Job was deleted successfully '})
+
+@api_view(['GET', 'PUT'])
+def edit_action(request, pk):
     try:
-        golf_action = Master.objects.filter(industry='Golf').get(pk=pk)
+        edit_action = Master.objects.get(pk=pk)
     except Master.DoesNotExist:
         return JsonResponse({'message': 'This job does not exist.'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        golf_action_serializer = MasterSerializer(golf_action)
-        return JsonResponse(golf_action_serializer.data)
+        edit_action_serializer = MasterSerializer(edit_action)
+        return JsonResponse(edit_action_serializer.data)
 
     elif request.method == 'PUT':
-        golf_action_data = JSONParser().parse(request)
-        golf_action_serializer = MasterSerializer(golf_action, data=golf_action_data)
-        if golf_action_serializer.is_valid():
-            golf_action_serializer.save()
-            return JsonResponse(golf_action_serializer.data)
-        return JsonResponse(golf_action_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        edit_action_data = JSONParser().parse(request)
+        edit_action_serializer = MasterSerializer(edit_action, data=edit_action_data)
+        if edit_action_serializer.is_valid():
+            edit_action_serializer.save()
+            return JsonResponse(edit_action_serializer.data)
+        return JsonResponse(edit_action_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     elif request.method == 'DELETE':
-        golf_action.delete()
+        edit_action.delete()
         return JsonResponse({'message': 'Job was deleted successfully '})
