@@ -36,7 +36,7 @@ def dashboard(request):
 @api_view(['GET', 'POST'])
 def golf(request):
     if request.method == 'GET':
-        golf_actions = Master.objects.filter(industry='Golf')
+        golf_actions = Master.objects.filter(industry='Golf').order_by("name", "request")
         golf_serializer = MasterSerializer(golf_actions, many=True)
         return JsonResponse(golf_serializer.data, safe=False)
 
@@ -51,7 +51,7 @@ def golf(request):
 @api_view((['GET']))
 def golf_open(request):
     if request.method == 'GET':
-        golf_open = Master.objects.filter(compDate=None)
+        golf_open = Master.objects.filter(compDate=None).order_by("oppNumber")
         golf_open_serializer = MasterSerializer(golf_open, many=True)
         return JsonResponse(golf_open_serializer.data, safe=False)
 
