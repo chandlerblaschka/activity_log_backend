@@ -1,6 +1,8 @@
+from calendar import weekday
 from tkinter.messagebox import RETRY
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from psycopg2 import Date
 # from rest_framework import viewsets
 from .serializers import MasterSerializer
 from .models import Master
@@ -9,6 +11,27 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 from rest_framework import status
+from datetime import date, datetime, timedelta
+
+today = datetime.now().date()
+
+if date.today().weekday() == 0:
+    this_week = datetime.now() + timedelta(days=5)
+
+if date.today().weekday() == 1:
+    this_week = datetime.now() + timedelta(days=4)
+
+if date.today().weekday() == 2:
+    this_week = datetime.now() + timedelta(days=3)
+
+if date.today().weekday() == 3:
+    this_week = datetime.now() + timedelta(days=2)
+
+if date.today().weekday() == 4:
+    this_week = datetime.now() + timedelta(days=1)
+
+if date.today().weekday() == 5 | 6:
+    this_week = datetime.now() + timedelta(days=6)
 
 
 # class MasterViewSet(viewsets.ModelViewSet):
@@ -32,11 +55,37 @@ def dashboard(request):
         dashboard_serializer = MasterSerializer(all_actions, many=True)
         return JsonResponse(dashboard_serializer.data, safe=False)
 
+@api_view(['GET'])
+def dashboard_filter(request, industry=None, action=None):
+    # try:
+    #     get_filter = Master.objects.all().filter(industry=industry, request=action)
+    # except Master.DoesNotExist:
+    #     return JsonResponse({'message': 'This job does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        get_filter = Master.objects.filter(industry=industry, request=action.replace('-', ' '))
+        get_filter_serializer = MasterSerializer(get_filter, many=True)
+        return JsonResponse(get_filter_serializer.data, safe=False)
+        
+
+@api_view(['GET'])
+def golf_book_order(request):
+    if request.method == 'GET':
+        golf_booked_orders = Master.objects.filter(industry='Golf', request='Book Order').order_by("name", "oppNumber")
+        golf_booked_order_serializer = MasterSerializer(golf_booked_orders, many=True)
+        return JsonResponse(golf_booked_order_serializer.data, safe=False)
+
+@api_view(['GET'])
+def golf_drawing(request):
+    if request.method == 'GET':
+        golf_booked_orders = Master.objects.filter(industry='Golf', request='Book Order').order_by("name", "oppNumber")
+        golf_booked_order_serializer = MasterSerializer(golf_booked_orders, many=True)
+        return JsonResponse(golf_booked_order_serializer.data, safe=False)
+
 
 @api_view(['GET', 'POST'])
 def golf(request):
     if request.method == 'GET':
-        golf_actions = Master.objects.filter(industry='Golf').order_by("name", "request")
+        golf_actions = Master.objects.filter(industry='Golf').order_by("name", "oppNumber")
         golf_serializer = MasterSerializer(golf_actions, many=True)
         return JsonResponse(golf_serializer.data, safe=False)
 
@@ -51,36 +100,25 @@ def golf(request):
 @api_view((['GET']))
 def golf_open(request):
     if request.method == 'GET':
-        golf_open = Master.objects.filter(compDate=None).order_by("oppNumber")
+        golf_open = Master.objects.filter(compDate=None).order_by("name", "oppNumber")
         golf_open_serializer = MasterSerializer(golf_open, many=True)
         return JsonResponse(golf_open_serializer.data, safe=False)
 
+@api_view((['GET']))
+def golf_today(request):
+    if request.method == 'GET':
+        golf_today = Master.objects.filter(dueDate__lte=today, compDate=None, industry='Golf').order_by("name", "oppNumber")
+        golf_today_serializer = MasterSerializer(golf_today, many=True)
+        return JsonResponse(golf_today_serializer.data, safe=False)
 
-# not used based on site functionality, but works as an endpoint
-# @api_view(['GET', 'PUT', 'DELETE'])
-# def golf_action(request, pk):
-#     try:
-#         golf_action = Master.objects.filter(industry='Golf').get(pk=pk)
-#     except Master.DoesNotExist:
-#         return JsonResponse({'message': 'This job does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+@api_view((['GET']))
+def golf_this_week(request):
+    if request.method == 'GET':
+        golf_this_week = Master.objects.filter(dueDate__lt=this_week, dueDate__gte=today, industry="Golf").order_by("name", "oppNumber")
+        golf_this_week_serializer = MasterSerializer(golf_this_week, many=True)
+        return JsonResponse(golf_this_week_serializer.data, safe=False)
 
-#     if request.method == 'GET':
-#         golf_action_serializer = MasterSerializer(golf_action)
-#         return JsonResponse(golf_action_serializer.data)
-
-#     elif request.method == 'PUT':
-#         golf_action_data = JSONParser().parse(request)
-#         golf_action_serializer = MasterSerializer(golf_action, data=golf_action_data)
-#         if golf_action_serializer.is_valid():
-#             golf_action_serializer.save()
-#             return JsonResponse(golf_action_serializer.data)
-#         return JsonResponse(golf_action_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-#     elif request.method == 'DELETE':
-#         golf_action.delete()
-#         return JsonResponse({'message': 'Job was deleted successfully '})
-
-@api_view(['GET', 'PUT'])
+@api_view(['GET', 'PUT', 'DELETE'])
 def edit_action(request, pk):
     try:
         edit_action = Master.objects.get(pk=pk)
