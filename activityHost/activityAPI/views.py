@@ -12,6 +12,7 @@ from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 from rest_framework import status
 from datetime import date, datetime, timedelta
+from django.db.models import Q
 
 today = datetime.now().date()
 
@@ -67,13 +68,13 @@ def dashboard_filter(request, industry=None, action=None):
         return JsonResponse(get_filter_serializer.data, safe=False)
 
 @api_view(['GET'])
-def dashboard_table(request, year=None, month=None, industry=None, action=None):
+def dashboard_table(request, year=None, month=None, industry=None, action=None, employee=None):
     # try:
     #     get_filter = Master.objects.all().filter(industry=industry, request=action)
     # except Master.DoesNotExist:
     #     return JsonResponse({'message': 'This job does not exist.'}, status=status.HTTP_404_NOT_FOUND)
     if request.method == 'GET':
-        get_table = Master.objects.filter(dueDate__year=year, dueDate__month=month, industry=industry, request=action.replace('-', ' '))
+        get_table = Master.objects.filter(Q(engineer=employee) | Q(sales=employee), dueDate__year=year, dueDate__month=month, industry=industry, request=action.replace('-', ' '))
         get_table_serializer = MasterSerializer(get_table, many=True)
         return JsonResponse(get_table_serializer.data, safe=False)
         
