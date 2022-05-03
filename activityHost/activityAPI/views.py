@@ -34,21 +34,6 @@ if date.today().weekday() == 4:
 if date.today().weekday() == 5 | 6:
     this_week = datetime.now() + timedelta(days=6)
 
-
-# class MasterViewSet(viewsets.ModelViewSet):
-#     queryset = Master.objects.all().order_by('industry')
-#     serializer_class = MasterSerializer
-#     permission_classes = (AllowAny,)
-
-# # Create your views here.
-
-# class GolfViewSet(viewsets.ModelViewSet):
-#     # queryset = Master.objects.filter(industry='Golf')
-#     queryset = Master.objects.filter(industry='Golf')
-#     serializer_class = MasterSerializer
-#     permission_classes = (AllowAny,)
-
-
 @api_view(['GET'])
 def dashboard(request):
     if request.method == 'GET':
@@ -58,77 +43,60 @@ def dashboard(request):
 
 @api_view(['GET'])
 def dashboard_filter(request, industry=None, action=None):
-    # try:
-    #     get_filter = Master.objects.all().filter(industry=industry, request=action)
-    # except Master.DoesNotExist:
-    #     return JsonResponse({'message': 'This job does not exist.'}, status=status.HTTP_404_NOT_FOUND)
     if request.method == 'GET':
         get_filter = Master.objects.filter(industry=industry, request=action.replace('-', ' '))
         get_filter_serializer = MasterSerializer(get_filter, many=True)
         return JsonResponse(get_filter_serializer.data, safe=False)
 
 @api_view(['GET'])
-def dashboard_table(request, year=None, month=None, industry=None, action=None, employee=None):
-    # try:
-    #     get_filter = Master.objects.all().filter(industry=industry, request=action)
-    # except Master.DoesNotExist:
-    #     return JsonResponse({'message': 'This job does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+def dashboard_table(request, year=None, month=None, action=None, employee=None):
     if request.method == 'GET':
-        get_table = Master.objects.filter(Q(engineer=employee) | Q(sales=employee), dueDate__year=year, dueDate__month=month, industry=industry, request=action.replace('-', ' '))
+        get_table = Master.objects.filter(Q(engineer=employee) | Q(sales=employee), dueDate__year=year, dueDate__month=month, request=action.replace('-', ' '))
         get_table_serializer = MasterSerializer(get_table, many=True)
         return JsonResponse(get_table_serializer.data, safe=False)
         
-
 @api_view(['GET'])
-def golf_book_order(request):
+def opportunity(request, oppNumber=None):
     if request.method == 'GET':
-        golf_booked_orders = Master.objects.filter(industry='Golf', request='Book Order').order_by("name", "oppNumber")
-        golf_booked_order_serializer = MasterSerializer(golf_booked_orders, many=True)
-        return JsonResponse(golf_booked_order_serializer.data, safe=False)
-
-@api_view(['GET'])
-def golf_drawing(request):
-    if request.method == 'GET':
-        golf_booked_orders = Master.objects.filter(industry='Golf', request='Book Order').order_by("name", "oppNumber")
-        golf_booked_order_serializer = MasterSerializer(golf_booked_orders, many=True)
-        return JsonResponse(golf_booked_order_serializer.data, safe=False)
-
+        get_opportunity = Master.objects.filter(oppNumber=oppNumber).order_by("request")
+        get_opportunity_serializer = MasterSerializer(get_opportunity, many=True)
+        return JsonResponse(get_opportunity_serializer.data, safe=False)
 
 @api_view(['GET', 'POST'])
-def golf(request):
+def industry(request, industry=None):
     if request.method == 'GET':
-        golf_actions = Master.objects.filter(industry='Golf').order_by("name", "oppNumber")
-        golf_serializer = MasterSerializer(golf_actions, many=True)
-        return JsonResponse(golf_serializer.data, safe=False)
+        industry_actions = Master.objects.filter(industry=industry).order_by("name", "oppNumber")
+        industry_serializer = MasterSerializer(industry_actions, many=True)
+        return JsonResponse(industry_serializer.data, safe=False)
 
     if request.method == 'POST':
-        golf_data = JSONParser().parse(request)
-        golf_serializer = MasterSerializer(data=golf_data)
-        if golf_serializer.is_valid():
-            golf_serializer.save()
-            return JsonResponse(golf_serializer.data, status=status.HTTP_201_CREATED)
-        return JsonResponse(golf_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        industry_data = JSONParser().parse(request)
+        industry_serializer = MasterSerializer(data=industry_data)
+        if industry_serializer.is_valid():
+            industry_serializer.save()
+            return JsonResponse(industry_serializer.data, status=status.HTTP_201_CREATED)
+        return JsonResponse(industry_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
 @api_view((['GET']))
-def golf_open(request):
+def industry_open(request, industry):
     if request.method == 'GET':
-        golf_open = Master.objects.filter(compDate=None).order_by("name", "oppNumber")
-        golf_open_serializer = MasterSerializer(golf_open, many=True)
-        return JsonResponse(golf_open_serializer.data, safe=False)
+        industry_open = Master.objects.filter(industry=industry, compDate=None).order_by("name", "oppNumber")
+        industry_open_serializer = MasterSerializer(industry_open, many=True)
+        return JsonResponse(industry_open_serializer.data, safe=False)
 
 @api_view((['GET']))
-def golf_today(request):
+def industry_today(request, industry):
     if request.method == 'GET':
-        golf_today = Master.objects.filter(dueDate__lte=today, compDate=None, industry='Golf').order_by("name", "oppNumber")
-        golf_today_serializer = MasterSerializer(golf_today, many=True)
-        return JsonResponse(golf_today_serializer.data, safe=False)
+        industry_today = Master.objects.filter(industry=industry, dueDate__lte=today, compDate=None).order_by("name", "oppNumber")
+        industry_today_serializer = MasterSerializer(industry_today, many=True)
+        return JsonResponse(industry_today_serializer.data, safe=False)
 
 @api_view((['GET']))
-def golf_this_week(request):
+def industry_this_week(request, industry):
     if request.method == 'GET':
-        golf_this_week = Master.objects.filter(dueDate__lt=this_week, dueDate__gte=today, industry="Golf").order_by("name", "oppNumber")
-        golf_this_week_serializer = MasterSerializer(golf_this_week, many=True)
-        return JsonResponse(golf_this_week_serializer.data, safe=False)
+        industry_this_week = Master.objects.filter(industry=industry, dueDate__lt=this_week, dueDate__gte=today).order_by("name", "oppNumber")
+        industry_this_week_serializer = MasterSerializer(industry_this_week, many=True)
+        return JsonResponse(industry_this_week_serializer.data, safe=False)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def edit_action(request, pk):
