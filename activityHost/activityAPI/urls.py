@@ -14,6 +14,8 @@ urlpatterns = [
     path(r'dashboard/golf/all/', views.golf),
     path(r'dashboard/golf/bookOrder/', views.golf_book_order),
     path(r'dashboard/<str:industry>/<slug:action>', views.dashboard_filter),
+    # path(r'dashboard/<int:year>/<int:month>/<str:industry>/<slug:request>/<str:employee>', views.dashboard_table),
+    re_path(r'dashboard/(?P<year>[0-9]{4})/(?P<month>[0-9]{2})/(?P<industry>\w+)/(?P<action>[-\w]+)', views.dashboard_table),
     path(r'golf/open/', views.golf_open),
     path(r'golf/today/', views.golf_today),
     path(r'golf/this_week/', views.golf_this_week),

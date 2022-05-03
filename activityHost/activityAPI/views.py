@@ -65,6 +65,17 @@ def dashboard_filter(request, industry=None, action=None):
         get_filter = Master.objects.filter(industry=industry, request=action.replace('-', ' '))
         get_filter_serializer = MasterSerializer(get_filter, many=True)
         return JsonResponse(get_filter_serializer.data, safe=False)
+
+@api_view(['GET'])
+def dashboard_table(request, year=None, month=None, industry=None, action=None):
+    # try:
+    #     get_filter = Master.objects.all().filter(industry=industry, request=action)
+    # except Master.DoesNotExist:
+    #     return JsonResponse({'message': 'This job does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        get_table = Master.objects.filter(dueDate__year=year, dueDate__month=month, industry=industry, request=action.replace('-', ' '))
+        get_table_serializer = MasterSerializer(get_table, many=True)
+        return JsonResponse(get_table_serializer.data, safe=False)
         
 
 @api_view(['GET'])
