@@ -94,7 +94,7 @@ def industry_today(request, industry):
 @api_view((['GET']))
 def industry_this_week(request, industry):
     if request.method == 'GET':
-        industry_this_week = Master.objects.filter(industry=industry, dueDate__lt=this_week, dueDate__gte=today).order_by("name", "oppNumber")
+        industry_this_week = Master.objects.filter(industry=industry, dueDate__lte=this_week, compDate=None).order_by("name", "oppNumber")
         industry_this_week_serializer = MasterSerializer(industry_this_week, many=True)
         return JsonResponse(industry_this_week_serializer.data, safe=False)
 
