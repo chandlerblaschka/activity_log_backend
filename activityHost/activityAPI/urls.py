@@ -17,4 +17,5 @@ urlpatterns = [
     path(r'<str:industry>/this_week/', views.industry_this_week),
     path(r'opportunity/<int:oppNumber>', views.opportunity),
     re_path(r'edit/(?P<pk>[0-9]+)$', views.edit_action),
+    path(r'input/', views.input),
  ]

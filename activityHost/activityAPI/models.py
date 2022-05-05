@@ -1,3 +1,4 @@
+from tkinter import CASCADE
 from django.db import models
 
 # Create your models here.
@@ -18,4 +19,10 @@ class Master(models.Model):
     comments = models.CharField(max_length=1000, blank=True)
     reqDate.editable = True
     dueDate.editable = True
-    compDate.editable = True        
+    compDate.editable = True
+
+class Input(models.Model):
+    entry_date = models.DateTimeField(auto_now=True)
+    entry = models.ForeignKey(Master, on_delete=models.CASCADE)
+
+

@@ -4,8 +4,8 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from psycopg2 import Date
 # from rest_framework import viewsets
-from .serializers import MasterSerializer
-from .models import Master
+from .serializers import InputSerializer, MasterSerializer
+from .models import Master, Input
 # from rest_framework.permissions import AllowAny
 from django.shortcuts import render
 from rest_framework.decorators import api_view
@@ -33,6 +33,20 @@ if date.today().weekday() == 4:
 
 if date.today().weekday() == 5 | 6:
     this_week = datetime.now() + timedelta(days=6)
+
+@api_view(['GET', 'POST'])
+def input(request):
+    if request.method == 'GET':
+        input_post = Input.objects.all()
+        input_serializer = InputSerializer(input_post, many=True)
+        return JsonResponse(input_serializer.data, safe=False)
+    if request.method == 'POST':
+        input_data = JSONParser().parse(request)
+        input_serializer = InputSerializer(data=input_data)
+        if input_serializer.is_valid():
+            input_serializer.save()
+            return JsonResponse(input_serializer.data, status=status.HTTP_201_CREATED)
+        return JsonResponse(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def dashboard(request):
